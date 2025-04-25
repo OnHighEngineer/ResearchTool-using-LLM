@@ -1,3 +1,6 @@
+import fetch from 'node-fetch';
+import * as cheerio from 'cheerio';
+
 /**
  * Represents the content of a web page.
  */
@@ -19,10 +22,32 @@ export interface WebPageContent {
  * @returns A promise that resolves to a WebPageContent object containing the title and content.
  */
 export async function getWebPageContent(url: string): Promise<WebPageContent> {
-  // TODO: Implement this by calling an API or using a library to fetch content from the URL.
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const html = await response.text();
+    const $ = cheerio.load(html);
 
-  return {
-    title: 'Example Web Page',
-    content: 'This is some example content from the web page.',
-  };
+    // Extract title
+    const title = $('title').text() || 'No Title';
+
+    // Extract all text content
+    let content = '';
+    $('body *').each((i, element) => {
+      content += $(element).text() + ' ';
+    });
+
+    // Clean up content by removing extra spaces
+    content = content.replace(/\s+/g, ' ').trim();
+
+    return {
+      title: title,
+      content: content,
+    };
+  } catch (error: any) {
+    console.error('Error fetching or parsing URL:', error);
+    throw new Error(`Failed to fetch content from URL: ${error.message}`);
+  }
 }

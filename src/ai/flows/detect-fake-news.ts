@@ -96,20 +96,34 @@ const detectFakeNewsFlow = ai.defineFlow<
       }
     }
 
-    const {output} = await detectFakeNewsPrompt({
-      input: articleText,
-    });
+    try {
+      const {output, completeToolCalls} = await detectFakeNewsPrompt({
+        input: articleText,
+      });
+      
+      let reasoning: string | undefined = 'No specific reasoning available for real news.';
+      const isFake = output?.score && output.score > 0.5 ? 'Fake' : 'Real';
 
-    let reasoning: string | undefined = undefined;
+      if (isFake === 'Fake' && completeToolCalls && completeToolCalls.length > 0) {
+          const toolCall = completeToolCalls[0];
+          if (toolCall.toolName === 'extractReasoning') {
+              reasoning = toolCall.output as string;
+          } else {
+              console.warn(`Unexpected tool call: ${toolCall.toolName}`);
+          }
+      } else if (isFake === 'Fake') {
+          reasoning = 'The article is classified as fake, but no specific reasoning was provided by the tool.';
+      }
 
-    if (output?.result === 'Fake') {
-      reasoning = `The article is fake because of these reasons found in the article: ${articleText}`;
+      return {
+          result: isFake,
+          score: output!.score,
+          cleanedInput: output!.cleanedInput,
+          reasoning,
+      };
+    } catch (error: any) {
+      console.error('Error in detectFakeNewsPrompt:', error);
+      throw new Error(`Error detecting fake news: ${error.message}`);
     }
-
-    return {
-      ...output!,
-      cleanedInput: output!.cleanedInput,
-      reasoning,
-    };
   }
 );
