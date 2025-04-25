@@ -1,3 +1,5 @@
+'use server';
+
 import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
 
@@ -51,3 +53,4 @@ export async function getWebPageContent(url: string): Promise<WebPageContent> {
     throw new Error(`Failed to fetch content from URL: ${error.message}`);
   }
 }
+
