@@ -8,7 +8,6 @@ import { Layout } from "@/components/layout";
 import { useState } from "react";
 import { detectFakeNews } from "@/ai/flows/detect-fake-news";
 import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 
@@ -96,9 +95,7 @@ export default function FakeNewsDetector() {
                 </div>
                 <div className="grid gap-2">
                   <h3 className="text-lg font-semibold">Cleaned Input:</h3>
-                  <ScrollArea className="h-[200px] w-full rounded-md border p-4">
-                    <Textarea readOnly value={result.cleanedInput} className="h-full w-full" />
-                  </ScrollArea>
+                  <Textarea readOnly value={result.cleanedInput} className="w-full rounded-md border p-4" />
                 </div>
               </div>
             )}

@@ -8,7 +8,6 @@ import { Layout } from "@/components/layout";
 import { useState } from "react";
 import { generateResearchPaper } from "@/ai/flows/generate-research-paper";
 import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Research() {
@@ -87,9 +86,7 @@ export default function Research() {
                   {researchPaper.sections.map((section: any, index: number) => (
                     <div key={index} className="grid gap-2">
                       <h3 className="text-lg font-semibold">{section.title}</h3>
-                      <ScrollArea className="h-[200px] w-full rounded-md border p-4">
-                        <Textarea readOnly value={section.content} className="h-full w-full" />
-                      </ScrollArea>
+                        <Textarea readOnly value={section.content} className="w-full rounded-md border p-4" />
                     </div>
                   ))}
                 </div>
@@ -104,4 +101,3 @@ export default function Research() {
     </Layout>
   );
 }
-
