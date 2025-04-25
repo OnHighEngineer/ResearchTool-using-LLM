@@ -74,7 +74,7 @@ const prompt = ai.definePrompt({
 
   Please generate a research paper with a title, abstract, and 3 sections. Each section should have a title and content.
   Follow this format:
-  ```json
+
   {
     "title": "Research Paper Title",
     "abstract": "A brief summary of the research paper.",
@@ -93,7 +93,7 @@ const prompt = ai.definePrompt({
       }
     ]
   }
-  ```
+
   `,tools:[decideHowToIncorporateQuery]
 });
 
