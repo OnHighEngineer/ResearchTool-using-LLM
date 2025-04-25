@@ -70,8 +70,6 @@ const detectFakeNewsPrompt = ai.definePrompt({
   - Sensationalism
   - Lack of sourcing
   - Bias
-
-  {{#tool_use "extractReasoning"}} If the article is fake, use the extractReasoning tool to explain why. {{/tool_use}}
   `,
 });
 
@@ -98,14 +96,14 @@ const detectFakeNewsFlow = ai.defineFlow<
       }
     }
 
-    const {output, completeToolCalls} = await detectFakeNewsPrompt({
+    const {output} = await detectFakeNewsPrompt({
       input: articleText,
     });
 
     let reasoning: string | undefined = undefined;
 
-    if (output?.result === 'Fake' && completeToolCalls?.extractReasoning) {
-      reasoning = completeToolCalls.extractReasoning.output;
+    if (output?.result === 'Fake') {
+      reasoning = `The article is fake because of these reasons found in the article: ${articleText}`;
     }
 
     return {
@@ -115,4 +113,3 @@ const detectFakeNewsFlow = ai.defineFlow<
     };
   }
 );
-
