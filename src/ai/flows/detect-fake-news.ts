@@ -73,6 +73,15 @@ const detectFakeNewsPrompt = ai.definePrompt({
 
   {{#tool_use "extractReasoning"}} If the article is fake, use the extractReasoning tool to explain why. {{/tool_use}}
   `,
+  helpers: {
+    tool_use: function (toolName: string, options: { fn: (context: any) => string; inverse: () => string }) {
+      if (toolName && toolName === 'extractReasoning') {
+        return options.fn(this);
+      } else {
+        return options.inverse();
+      }
+    }
+  },
 });
 
 const detectFakeNewsFlow = ai.defineFlow<
