@@ -85,9 +85,14 @@ export default function FakeNewsDetector() {
             {result && (
               <div className="mt-4 grid gap-4">
                 <div className="grid gap-2">
-                  <h3 className="text-lg font-semibold">Result: {result.result}</h3>
+                  <h3 className="text-lg font-semibold">Result: <span className={result.result === 'Fake' ? "text-destructive" : "text-green-500"}>{result.result}</span></h3>
                   <p>Score: {result.score}</p>
-                  <p>Reasoning: {result.reasoning}</p>
+                  <div className="grid gap-1">
+                    <p className="font-semibold">Reasoning:</p>
+                    <div className="rounded-md border p-4 bg-muted">
+                      <p className="text-sm">{result.reasoning}</p>
+                    </div>
+                  </div>
                 </div>
                 <div className="grid gap-2">
                   <h3 className="text-lg font-semibold">Cleaned Input:</h3>
@@ -103,4 +108,3 @@ export default function FakeNewsDetector() {
     </Layout>
   );
 }
-
