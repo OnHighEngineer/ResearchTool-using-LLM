@@ -13,7 +13,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <header className="bg-secondary py-4">
         <div className="container flex items-center justify-between">
           <Button onClick={() => router.push("/")} variant="link" className="text-lg font-semibold">
-            VeriScope
+            ResearchTool
           </Button>
           <nav>
             <Button onClick={() => router.push("/research")} variant="ghost" className="mr-4">
@@ -28,7 +28,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <main className="container flex-grow p-4">{children}</main>
       <footer className="bg-secondary py-4">
         <div className="container text-center text-sm text-muted-foreground">
-          &copy; {new Date().getFullYear()} VeriScope. All rights reserved.
+          &copy; {new Date().getFullYear()} ResearchTool. All rights reserved.
         </div>
       </footer>
       <Toaster />

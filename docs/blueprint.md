@@ -1,4 +1,4 @@
-# **App Name**: VeriScope
+# **App Name**: Research Tool
 
 ## Core Features:
 

@@ -13,7 +13,7 @@ export default function Home() {
       <div className="flex flex-col items-center justify-center min-h-[80vh]">
         <Card className="w-full max-w-md">
           <CardHeader className="flex flex-col items-center">
-            <CardTitle className="text-2xl font-bold">VeriScope</CardTitle>
+            <CardTitle className="text-2xl font-bold">ResearchTool using LLM</CardTitle>
             <CardDescription className="text-center">
               Your trusted source for research and fake news detection.
             </CardDescription>
