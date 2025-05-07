@@ -15,4 +15,5 @@ To start exploring the capabilities of VeriScope, take a look at the following k
 *   **Research Paper Generation:** `src/app/research/page.tsx`
 
 Start Cloning and explore :
-* **clone:**'https://github.com/OnHighEngineer/VeriScope'
+* **clone: **https://github.com/OnHighEngineer/ResearchTool-using-LLM**
+* 
