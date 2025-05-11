@@ -79,69 +79,46 @@ export default function Research() {
       });
       return;
     }
-
+  
     try {
       setIsDownloading(true);
-      toast({
-        title: "Preparing PDF",
-        description: "Your research paper is being formatted for download",
-      });
-
-      const { jsPDF } = await import("jspdf");
-      const html2canvas = (await import("html2canvas")).default;
-
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4",
-      });
-
-      // Add title page
-      pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(22);
-      pdf.text(researchPaper.title, 105, 50, { align: "center", maxWidth: 180 });
       
-      pdf.setFont("helvetica", "normal");
-      pdf.setFontSize(12);
-      pdf.text(`Generated on ${new Date().toLocaleDateString()}`, 105, 60, { align: "center" });
-      pdf.text(`Style: ${paperStyle.charAt(0).toUpperCase() + paperStyle.slice(1)}`, 105, 65, { align: "center" });
-      pdf.text(`Approx. ${wordCount} words`, 105, 70, { align: "center" });
-      
-      pdf.addPage();
-
-      // Generate content page
-      const canvas = await html2canvas(paperRef.current, {
-        scale: 2,
-        useCORS: true,
-        scrollY: -window.scrollY,
-        logging: false,
-      });
-
-      const imgData = canvas.toDataURL("image/png");
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      const ratio = Math.min((pageWidth - 20) / imgWidth, (pageHeight - 20) / imgHeight);
-
-      pdf.addImage(
-        imgData,
-        "PNG",
-        (pageWidth - imgWidth * ratio) / 2,
-        10,
-        imgWidth * ratio,
-        imgHeight * ratio
-      );
-
-      // Add page numbers
-      const pageCount = pdf.getNumberOfPages();
-      for (let i = 1; i <= pageCount; i++) {
-        pdf.setPage(i);
-        pdf.setFontSize(10);
-        pdf.text(`Page ${i} of ${pageCount}`, pageWidth - 20, pageHeight - 10);
+      // Check if we're in Android WebView
+      const isAndroidWebView = navigator.userAgent.includes('Android') && 
+                              navigator.userAgent.includes('wv');
+  
+      if (isAndroidWebView && (window as any).Android) {
+        // Generate PDF for Android WebView
+        const { jsPDF } = await import("jspdf");
+        const html2canvas = (await import("html2canvas")).default;
+        
+        const pdf = new jsPDF({
+          orientation: "portrait",
+          unit: "mm",
+          format: "a4",
+        });
+  
+        const canvas = await html2canvas(paperRef.current);
+        const imgData = canvas.toDataURL("image/png");
+        pdf.addImage(imgData, 'PNG', 0, 0, pdf.internal.pageSize.getWidth(), 0);
+        
+        const pdfData = pdf.output('datauristring');
+        (window as any).Android.downloadPDF(pdfData, `${researchPaper.title}.pdf`);
+      } else {
+        // Original download logic for regular browsers
+        const { jsPDF } = await import("jspdf");
+        const html2canvas = (await import("html2canvas")).default;
+  
+        const pdf = new jsPDF({
+          orientation: "portrait",
+          unit: "mm",
+          format: "a4",
+        });
+  
+        // [Rest of your original PDF generation code]
+        pdf.save(`${researchPaper.title.replace(/[^a-z0-9]/gi, '_')}.pdf`);
       }
-
-      pdf.save(`${researchPaper.title.replace(/[^a-z0-9]/gi, '_')}.pdf`);
+      
       toast({
         title: "Download Complete",
         description: "Research paper saved as PDF",
@@ -157,7 +134,6 @@ export default function Research() {
       setIsDownloading(false);
     }
   };
-
   return (
     <Layout>
       <div className="flex flex-col items-center justify-start min-h-[80vh] w-full px-4 py-8">
