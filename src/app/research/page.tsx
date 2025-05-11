@@ -82,59 +82,64 @@ export default function Research() {
   
     try {
       setIsDownloading(true);
-      
-      // Check if we're in Android WebView
-      const isAndroidWebView = navigator.userAgent.includes('Android') && 
-                              navigator.userAgent.includes('wv');
-  
-      if (isAndroidWebView && (window as any).Android) {
-        // Generate PDF for Android WebView
-        const { jsPDF } = await import("jspdf");
-        const html2canvas = (await import("html2canvas")).default;
-        
-        const pdf = new jsPDF({
-          orientation: "portrait",
-          unit: "mm",
-          format: "a4",
-        });
-  
-        const canvas = await html2canvas(paperRef.current);
-        const imgData = canvas.toDataURL("image/png");
-        pdf.addImage(imgData, 'PNG', 0, 0, pdf.internal.pageSize.getWidth(), 0);
-        
-        const pdfData = pdf.output('datauristring');
-        (window as any).Android.downloadPDF(pdfData, `${researchPaper.title}.pdf`);
-      } else {
-        // Original download logic for regular browsers
-        const { jsPDF } = await import("jspdf");
-        const html2canvas = (await import("html2canvas")).default;
-  
-        const pdf = new jsPDF({
-          orientation: "portrait",
-          unit: "mm",
-          format: "a4",
-        });
-  
-        // [Rest of your original PDF generation code]
-        pdf.save(`${researchPaper.title.replace(/[^a-z0-9]/gi, '_')}.pdf`);
-      }
-      
       toast({
-        title: "Download Complete",
-        description: "Research paper saved as PDF",
+        title: "Preparing PDF",
+        description: "Generating your research paper...",
+      });
+  
+      const { jsPDF } = await import("jspdf");
+      const html2canvas = (await import("html2canvas")).default;
+  
+      // Create PDF
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+  
+      // Generate canvas from content
+      const canvas = await html2canvas(paperRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+      });
+  
+      // Add to PDF
+      const imgData = canvas.toDataURL("image/png");
+      pdf.addImage(imgData, 'PNG', 10, 10, 190, 0);
+  
+      // Create download link (works in WebView and browsers)
+      const pdfBlob = pdf.output("blob");
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      const fileName = `${researchPaper.title.replace(/[^a-z0-9]/gi, '_')}.pdf`;
+  
+      // Trigger download
+      const link = document.createElement("a");
+      link.href = pdfUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+  
+      // Clean up
+      setTimeout(() => URL.revokeObjectURL(pdfUrl), 100);
+  
+      toast({
+        title: "Download Started",
+        description: "Your paper will save to your downloads folder",
       });
     } catch (error) {
       console.error("PDF generation error:", error);
       toast({
         variant: "destructive",
         title: "Download Failed",
-        description: "Failed to generate PDF. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to generate PDF",
       });
     } finally {
       setIsDownloading(false);
     }
   };
-  return (
+  return(
     <Layout>
       <div className="flex flex-col items-center justify-start min-h-[80vh] w-full px-4 py-8">
         <div className="w-full max-w-4xl mx-auto">
