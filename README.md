@@ -15,5 +15,4 @@ To start exploring the capabilities of VeriScope, take a look at the following k
 *   **Research Paper Generation:** `src/app/research/page.tsx`
 
 Start Cloning and explore :
-* **clone: **https://github.com/OnHighEngineer/ResearchTool-using-LLM**
-* 
+* **clone: **https://github.com/OnHighEngineer/ResearchTool-using-LLM**/ use ur own gemini api key
