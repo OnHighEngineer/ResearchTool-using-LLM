@@ -33,8 +33,8 @@ export default function Research() {
   const [researchPaper, setResearchPaper] = useState<ResearchPaper | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
-  const [paperStyle, setPaperStyle] = useState("academic");
-  const [wordCount, setWordCount] = useState(1500);
+  const [paperStyle, setPaperStyle] = useState<"academic" | "professional" | "concise" | "detailed">("academic");
+  const [wordCount, setWordCount] = useState<number>(1500);
   const { toast } = useToast();
   const paperRef = useRef<HTMLDivElement>(null);
 
@@ -178,7 +178,7 @@ export default function Research() {
                     <Label>Paper Style</Label>
                     <Select 
                       value={paperStyle} 
-                      onValueChange={setPaperStyle}
+                      onValueChange={(val) => setPaperStyle(val as "academic" | "professional" | "concise" | "detailed")}
                       disabled={isGenerating}
                     >
                       <SelectTrigger className="w-full">

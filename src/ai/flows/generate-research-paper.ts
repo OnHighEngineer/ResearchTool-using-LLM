@@ -14,6 +14,8 @@ import {z} from 'genkit';
 
 const GenerateResearchPaperInputSchema = z.object({
   topic: z.string().describe('The topic of the research paper.'),
+  style: z.enum(['academic', 'professional', 'concise', 'detailed']).optional().describe('The writing style of the research paper.'),
+  wordCount: z.number().optional().describe('The approximate word count for the research paper.'),
 });
 export type GenerateResearchPaperInput = z.infer<typeof GenerateResearchPaperInputSchema>;
 
@@ -24,8 +26,15 @@ const GenerateResearchPaperOutputSchema = z.object({
     z.object({
       title: z.string().describe('The title of the section.'),
       content: z.string().describe('The content of the section.'),
+      subsections: z.array(
+        z.object({
+          title: z.string().describe('The title of the subsection.'),
+          content: z.string().describe('The content of the subsection.'),
+        })
+      ).optional().describe('Optional subsections for the section.'),
     })
   ).describe('The sections of the research paper.'),
+  references: z.array(z.string()).optional().describe('References for the research paper.'),
 });
 export type GenerateResearchPaperOutput = z.infer<typeof GenerateResearchPaperOutputSchema>;
 
@@ -52,6 +61,8 @@ const prompt = ai.definePrompt({
   input: {
     schema: z.object({
       topic: z.string().describe('The topic of the research paper.'),
+      style: z.string().describe('The writing style of the research paper.'),
+      wordCount: z.number().describe('The approximate word count for the research paper.'),
       incorporationStrategy: z.string().describe('How to incorporate the user query into the research paper.'),
     }),
   },
@@ -63,16 +74,25 @@ const prompt = ai.definePrompt({
         z.object({
           title: z.string().describe('The title of the section.'),
           content: z.string().describe('The content of the section.'),
+          subsections: z.array(
+            z.object({
+              title: z.string().describe('The title of the subsection.'),
+              content: z.string().describe('The content of the subsection.'),
+            })
+          ).optional().describe('Optional subsections for the section.'),
         })
       ).describe('The sections of the research paper.'),
+      references: z.array(z.string()).optional().describe('References for the research paper.'),
     }),
   },
   prompt: `You are an AI research assistant tasked with generating research papers on given topics.
 
   The user has requested a research paper on the following topic: {{{topic}}}.
+  Writing style: {{{style}}}
+  Target word count: {{{wordCount}}}
   Here is the strategy for incorporating the topic: {{{incorporationStrategy}}}
 
-  Please generate a research paper with a title, abstract, and 3 sections. Each section should have a title and content.
+  Please generate a research paper with a title, abstract, and 3 sections. Each section should have a title and content. Include subsections where appropriate and add references at the end.
   Follow this format:
 
   {
@@ -81,7 +101,13 @@ const prompt = ai.definePrompt({
     "sections": [
       {
         "title": "Section 1 Title",
-        "content": "Section 1 Content"
+        "content": "Section 1 Content",
+        "subsections": [
+          {
+            "title": "Subsection 1 Title",
+            "content": "Subsection 1 Content"
+          }
+        ]
       },
       {
         "title": "Section 2 Title",
@@ -91,7 +117,8 @@ const prompt = ai.definePrompt({
         "title": "Section 3 Title",
         "content": "Section 3 Content"
       }
-    ]
+    ],
+    "references": ["Reference 1", "Reference 2"]
   }
 
   `,tools:[decideHowToIncorporateQuery]
@@ -111,6 +138,8 @@ const generateResearchPaperFlow = ai.defineFlow<
 
   const {output} = await prompt({
     topic: input.topic,
+    style: input.style || 'academic',
+    wordCount: input.wordCount || 1500,
     incorporationStrategy,
   });
   return output!;

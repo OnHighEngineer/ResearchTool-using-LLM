@@ -40,7 +40,7 @@ export default function FakeNewsDetector() {
     setResult(null);
 
     try {
-      const data = await detectFakeNews({ input, type: inputType });
+      const data = await detectFakeNews({ input });
       
       setHistory(prev => [{
         input: input.slice(0, 50) + (input.length > 50 ? "..." : ""),

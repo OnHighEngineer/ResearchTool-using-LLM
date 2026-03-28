@@ -13,6 +13,7 @@ import {getWebPageContent} from '@/services/url-content';
 
 const DetectFakeNewsInputSchema = z.object({
   input: z.string().describe('The article text or URL to check for fake news.'),
+  type: z.enum(['text', 'url']).optional().describe('The type of input - text or URL.'),
 });
 export type DetectFakeNewsInput = z.infer<typeof DetectFakeNewsInputSchema>;
 
@@ -28,23 +29,6 @@ export async function detectFakeNews(input: DetectFakeNewsInput): Promise<Detect
   return detectFakeNewsFlow(input);
 }
 
-const decideHowToIncorporateTheUserQueryTool = ai.defineTool({
-  name: 'extractReasoning',
-  description: 'Extract the parts of the article most affect the overall determination of whether the article is fake.',
-  inputSchema: z.object({
-    article: z.string().describe('The article text'),
-    isFake: z.boolean().describe('A boolean representing whether the article is fake or not'),
-  }),
-  outputSchema: z.string().describe('The reasoning behind classifying the article as real or fake.'),
-},
-async input => {
-  // This can call any typescript function.
-  // Return the reasoning
-  return `The article is ${input.isFake ? 'fake' : 'real'} because of these reasons found in the article: ${input.article}`;
-}
-);
-
-
 const detectFakeNewsPrompt = ai.definePrompt({
   name: 'detectFakeNewsPrompt',
   input: {
@@ -59,7 +43,6 @@ const detectFakeNewsPrompt = ai.definePrompt({
       cleanedInput: z.string().describe('A cleaned version of the input text.'),
     }),
   },
-  tools: [decideHowToIncorporateTheUserQueryTool],
   prompt: `You are a fake news detection expert. You will be given an article and you will determine if it is real or fake news.
 
   Article: {{{input}}}
@@ -97,22 +80,15 @@ const detectFakeNewsFlow = ai.defineFlow<
     }
 
     try {
-      const {output, completeToolCalls} = await detectFakeNewsPrompt({
+      const {output} = await detectFakeNewsPrompt({
         input: articleText,
       });
       
       let reasoning: string | undefined = 'No specific reasoning available for real news.';
       const isFake = output?.score && output.score > 0.5 ? 'Fake' : 'Real';
 
-      if (isFake === 'Fake' && completeToolCalls && completeToolCalls.length > 0) {
-          const toolCall = completeToolCalls[0];
-          if (toolCall.toolName === 'extractReasoning') {
-              reasoning = toolCall.output as string;
-          } else {
-              console.warn(`Unexpected tool call: ${toolCall.toolName}`);
-          }
-      } else if (isFake === 'Fake') {
-          reasoning = 'The article is classified as fake, but no specific reasoning was provided by the tool.';
+      if (isFake === 'Fake' && output) {
+          reasoning = `The article is classified as fake with a confidence score of ${Math.round(output.score * 100)}%. Key indicators include sensationalism, lack of verifiable sources, or potential bias in the content.`;
       }
 
       return {
